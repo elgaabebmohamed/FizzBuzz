@@ -69,8 +69,5 @@ pipeline {
         publishIssues id: 'analysis-all', name: 'All Issues',
                 issues: [checkstyle, pmd, spotbugs] //, filters: [includePackage('io.jenkins.plugins.analysis.*')]
     }
-
-
-      }
   }
 }
