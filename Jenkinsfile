@@ -43,8 +43,8 @@ pipeline {
     }
 
     stage('Basic Quality Report') {
-        echo "3.Basic quality report"
-        sh "mvn site "
+
+        sh 'mvn site'
 
         def java = scanForIssues tool: java()
         def javadoc = scanForIssues tool: javaDoc()
