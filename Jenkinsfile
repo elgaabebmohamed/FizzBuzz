@@ -42,68 +42,35 @@ pipeline {
      }
     }
 
-      stage('Code Quality Analysis') {
-       parallel {
-        stage('PMD') {
-         agent {
-          docker {
-           image 'maven:3.6.0-jdk-8-alpine'
-           args '-v /share/CACHEDEV1_DATA/Container/container-station-data/lib/docker/volumes/783e694a6bccfac21f65586fe4e751c58d9bd9773a9ae660010dd3dac362419b/_data:/root/.m2/repository'
-           reuseNode true
-          }
-         }
-         steps {
-          sh ' mvn pmd:pmd'
-          // using pmd plugin
-          step([$class: 'PmdPublisher', pattern: '**/target/pmd.xml'])
-         }
-        }
-        stage('Findbugs') {
-         agent {
-          docker {
-           image 'maven:3.6.0-jdk-8-alpine'
-           args '-v /share/CACHEDEV1_DATA/Container/container-station-data/lib/docker/volumes/783e694a6bccfac21f65586fe4e751c58d9bd9773a9ae660010dd3dac362419b/_data:/root/.m2/repository'
-           reuseNode true
-          }
-         }
-         steps {
-          sh ' mvn findbugs:findbugs'
-          // using findbugs plugin
-          findbugs pattern: '**/target/findbugsXml.xml'
-         }
-        }
-        stage('JavaDoc') {
-         agent {
-          docker {
-           image 'maven:3.6.0-jdk-8-alpine'
-           args '-v /share/CACHEDEV1_DATA/Container/container-station-data/lib/docker/volumes/783e694a6bccfac21f65586fe4e751c58d9bd9773a9ae660010dd3dac362419b/_data:/root/.m2/repository'
-           reuseNode true
-          }
-         }
-         steps {
-          sh ' mvn javadoc:javadoc'
-          step([$class: 'JavadocArchiver', javadocDir: './target/site/apidocs', keepAll: 'true'])
-         }
-        }
-        stage('SonarQube') {
-         agent {
-          docker {
-           image 'maven:3.6.0-jdk-8-alpine'
-           args "-v /share/CACHEDEV1_DATA/Container/container-station-data/lib/docker/volumes/783e694a6bccfac21f65586fe4e751c58d9bd9773a9ae660010dd3dac362419b/_data:/root/.m2/repository"
-           reuseNode true
-          }
-         }
-         steps {
-           sh " mvn sonar:sonar -Dsonar.host.url=$SONARQUBE_URL:$SONARQUBE_PORT"
-         }
-        }
-       }
-       post {
-        always {
-         // using warning next gen plugin
-         recordIssues aggregatingResults: true, tools: [javaDoc(), checkStyle(pattern: '**/target/checkstyle-result.xml'), findBugs(pattern: '**/target/findbugsXml.xml', useRankAsPriority: true), pmdParser(pattern: '**/target/pmd.xml')]
-        }
-       }
+    stage('Basic Quality Report') {
+        echo "3.Basic quality report"
+        sh "mvn site "
+
+        def java = scanForIssues tool: java()
+        def javadoc = scanForIssues tool: javaDoc()
+
+        publishIssues id: 'analysis-java', name: 'Java Issues', issues: [java, javadoc]  //, filters: [includePackage('io.jenkins.plugins.analysis.*')]
+
+        def checkstyle = scanForIssues tool: checkStyle(pattern: '**/target/checkstyle-result.xml')
+        publishIssues issues: [checkstyle]
+
+        def pmd = scanForIssues tool: pmdParser(pattern: '**/target/pmd.xml')
+        publishIssues issues: [pmd]
+
+        def cpd = scanForIssues tool: cpd(pattern: '**/target/cpd.xml')
+        publishIssues issues: [cpd]
+
+        def spotbugs = scanForIssues tool: spotBugs(pattern: '**/target/findbugsXml.xml')
+        publishIssues issues: [spotbugs]
+
+        def maven = scanForIssues tool: mavenConsole()
+        publishIssues issues: [maven]
+
+        publishIssues id: 'analysis-all', name: 'All Issues',
+                issues: [checkstyle, pmd, spotbugs] //, filters: [includePackage('io.jenkins.plugins.analysis.*')]
+    }
+
+
       }
   }
 }
