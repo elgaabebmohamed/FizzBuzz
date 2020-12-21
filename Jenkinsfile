@@ -105,7 +105,7 @@
                 }
             }
             steps {
-                sh " mvn sonar:sonar -Dsonar.host.url=$SONARQUBE_URL:$SONARQUBE_PORT"
+                sh " mvn sonar:sonar -X -Dsonar.host.url=$SONARQUBE_URL:$SONARQUBE_PORT"
             }
           }
 
