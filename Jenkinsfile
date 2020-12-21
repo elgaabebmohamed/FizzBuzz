@@ -101,7 +101,7 @@
          post {
           always {
            // using warning next gen plugin
-           recordIssues aggregatingResults: true, tools: [javaDoc(), checkStyle(pattern: '**/target/checkstyle-result.xml'), pmdParser(pattern: '**/target/pmd.xml')]
+           recordIssues aggregatingResults: true, sourceDirectory: '/var/jenkins_home/workspace/FizzBuzz_master', tools: [javaDoc(), checkStyle(pattern: '**/target/checkstyle-result.xml'), pmdParser(pattern: '**/target/pmd.xml')]
           }
          }
         }
