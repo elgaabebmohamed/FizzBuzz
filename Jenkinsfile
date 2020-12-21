@@ -104,32 +104,6 @@ stage('Code Quality Analysis') {
     //findbugs pattern: '**/target/findbugsXml.xml'
    }
   }
-  stage('JavaDoc') {
-   agent {
-    docker {
-     image 'maven:3.6.0-jdk-8-alpine'
-     args '-v /share/CACHEDEV1_DATA/Container/container-station-data/lib/docker/volumes/783e694a6bccfac21f65586fe4e751c58d9bd9773a9ae660010dd3dac362419b/_data:/root/.m2/repository'
-     reuseNode true
-    }
-   }
-   steps {
-    echo 'Hello World'
-    sh ' mvn javadoc:javadoc'
-    step([$class: 'JavadocArchiver', javadocDir: './target/site/apidocs', keepAll: 'true'])
-   }
-  }
-  stage('SonarQube') {
-   agent {
-    docker {
-     image 'maven:3.6.0-jdk-8-alpine'
-     args "-v /share/CACHEDEV1_DATA/Container/container-station-data/lib/docker/volumes/783e694a6bccfac21f65586fe4e751c58d9bd9773a9ae660010dd3dac362419b/_data:/root/.m2/repository"
-     reuseNode true
-    }
-   }
-   steps {
-     sh " mvn sonar:sonar -Dsonar.host.url=$SONARQUBE_URL:$SONARQUBE_PORT"
-   }
-  }
  }
  post {
   always {
