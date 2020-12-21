@@ -68,7 +68,7 @@ stage('Code Quality Analysis') {
    }
    steps {
                     script {
-                       sh "mvn -B -V -U -e checkstyle:checkstyle pmd:pmd pmd:cpd spotbugs:spotbugs findbugs:findbugs"
+                       sh "mvn -B -V -U -e checkstyle:checkstyle pmd:pmd pmd:cpd findbugs:findbugs"
 
                        def checkstyle = scanForIssues tool: checkStyle(pattern: '**/target/checkstyle-result.xml')
                        publishIssues issues: [checkstyle]
@@ -79,8 +79,6 @@ stage('Code Quality Analysis') {
                        def cpd = scanForIssues tool: cpd(pattern: '**/target/cpd.xml')
                        publishIssues issues: [cpd]
 
-                       def spotbugs = scanForIssues tool: [$class: 'SpotBugs'], pattern: '**/target/spotbugsXml.xml'
-                       publishIssues issues: [spotbugs]
 
                        def findbugs = scanForIssues tool: [$class: 'FindBugs'], pattern: '**/target/findbugsXml.xml'
                        publishIssues issues:[findbugs]
@@ -99,7 +97,7 @@ stage('Code Quality Analysis') {
                            filters: [includePackage('io.jenkins.plugins.analysis.*')]
 
                        publishIssues id: 'gatherAnalysis', name: 'All Issues',
-                           issues: [checkstyle, pmd, cpd, spotbugs, findbugs, maven]
+                           issues: [checkstyle, pmd, cpd, findbugs, maven]
                    }
     //sh ' mvn findbugs:findbugs'
     // using findbugs plugin
