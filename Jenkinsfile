@@ -67,9 +67,43 @@ stage('Code Quality Analysis') {
     }
    }
    steps {
-    sh ' mvn findbugs:findbugs'
+                    script {
+                       sh "mvn -B -V -U -e checkstyle:checkstyle pmd:pmd pmd:cpd spotbugs:spotbugs findbugs:findbugs"
+
+                       def checkstyle = scanForIssues tool: checkStyle(pattern: '**/target/checkstyle-result.xml')
+                       publishIssues issues: [checkstyle]
+
+                       def pmd = scanForIssues tool: pmdParser(pattern: '**/target/pmd.xml')
+                       publishIssues issues: [pmd]
+
+                       def cpd = scanForIssues tool: cpd(pattern: '**/target/cpd.xml')
+                       publishIssues issues: [cpd]
+
+                       def spotbugs = scanForIssues tool: [$class: 'SpotBugs'], pattern: '**/target/spotbugsXml.xml'
+                       publishIssues issues: [spotbugs]
+
+                       def findbugs = scanForIssues tool: [$class: 'FindBugs'], pattern: '**/target/findbugsXml.xml'
+                       publishIssues issues:[findbugs]
+
+                       def maven = scanForIssues tool: mavenConsole()
+                       publishIssues issues: [maven]
+
+                       def java = scanForIssues tool: [$class: 'Java']
+                       publishIssues issues: [java]
+
+                       def javadoc = scanForIssues tool: [$class: 'JavaDoc']
+                       publishIssues issues: [javadoc]
+
+                       publishIssues id: 'gatherJava', name: 'Java and JavaDoc',
+                           issues: [java, javadoc],
+                           filters: [includePackage('io.jenkins.plugins.analysis.*')]
+
+                       publishIssues id: 'gatherAnalysis', name: 'All Issues',
+                           issues: [checkstyle, pmd, cpd, spotbugs, findbugs, maven]
+                   }
+    //sh ' mvn findbugs:findbugs'
     // using findbugs plugin
-    findbugs pattern: '**/target/findbugsXml.xml'
+    //findbugs pattern: '**/target/findbugsXml.xml'
    }
   }
   stage('JavaDoc') {
