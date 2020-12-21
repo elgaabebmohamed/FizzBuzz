@@ -97,7 +97,7 @@
          post {
           always {
            // using warning next gen plugin
-           recordIssues aggregatingResults: true, tools: [javaDoc(), checkStyle(pattern: '**/target/checkstyle-result.xml'), useRankAsPriority: true), pmdParser(pattern: '**/target/pmd.xml')]
+           recordIssues aggregatingResults: true, tools: [javaDoc(), checkStyle(pattern: '**/target/checkstyle-result.xml'), pmdParser(pattern: '**/target/pmd.xml')]
           }
          }
         }
