@@ -105,7 +105,7 @@
                 }
             }
             steps {
-                sh " mvn sonar:sonar -X -Dsonar.host.url=$SONARQUBE_URL:$SONARQUBE_PORT"
+                sh " mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.2:sonar -X -Dsonar.host.url=$SONARQUBE_URL:$SONARQUBE_PORT"
             }
           }
 
