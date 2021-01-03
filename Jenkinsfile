@@ -48,6 +48,12 @@
           always {
            junit 'target/surefire-reports/**/*.xml'
           }
+          success {
+            stash(name: 'artifact', includes: 'target/*.war')
+            stash(name: 'pom', includes: 'pom.xml')
+            // to add artifacts in jenkins pipeline tab (UI)
+            archiveArtifacts 'target/*.war'
+          }
          }
         }
 
@@ -129,8 +135,8 @@
            }
            steps {
             script {
-             //unstash 'pom'
-             //unstash 'artifact'
+             unstash 'pom'
+             unstash 'artifact'
              // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
              pom = readMavenPom file: "pom.xml";
              // Find built artifact under target folder
