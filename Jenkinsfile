@@ -48,12 +48,12 @@
           always {
            junit 'target/surefire-reports/**/*.xml'
           }
-          success {
+          // success {
             // stash(name: 'artifact', includes: 'target/*.jar')
-            stash(name: 'pom', includes: 'pom.xml')
+            // stash(name: 'pom', includes: 'pom.xml')
             // to add artifacts in jenkins pipeline tab (UI)
-            archiveArtifacts 'target/*.jar'
-          }
+            // archiveArtifacts 'target/*.jar'
+          // }
          }
         }
 
@@ -129,6 +129,25 @@
          }
         }
 
+        stage('Build Jar'){
+          agent {
+                docker {
+                    image 'maven:3.6.0-jdk-8-alpine'
+                    args "-v /share/CACHEDEV1_DATA/Container/container-station-data/lib/docker/volumes/783e694a6bccfac21f65586fe4e751c58d9bd9773a9ae660010dd3dac362419b/_data:/root/.m2/repository"
+                    reuseNode true
+                }
+          }
+          steps {
+            sh 'mvn package'
+          }
+          success {
+            stash(name: 'artifact', includes: 'target/*.jar')
+            stash(name: 'pom', includes: 'pom.xml')
+            // to add artifacts in jenkins pipeline tab (UI)
+            archiveArtifacts 'target/*.jar'
+          }
+        }
+
           stage('Deploy Artifact To Nexus') {
            when {
             branch 'master'
@@ -136,7 +155,7 @@
            steps {
             script {
              unstash 'pom'
-             // unstash 'artifact'
+             unstash 'artifact'
              // Read POM xml file using 'readMavenPom' step , this step 'readMavenPom' is included in: https://plugins.jenkins.io/pipeline-utility-steps
              pom = readMavenPom file: "pom.xml";
              // Find built artifact under target folder
